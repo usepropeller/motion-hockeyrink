@@ -1,3 +1,4 @@
+# Copyright (c) 2013, Turboprop Inc <clay@usepropeller.com>
 # Copyright (c) 2012, Laurent Sansonetti <lrz@hipbyte.com>
 # All rights reserved.
 # 
@@ -22,4 +23,5 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-require 'motion/project/testflight'
+require 'hockeyapp'
+require 'motion/project/hockeyapp'

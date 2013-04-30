@@ -1,0 +1,22 @@
+# -*- coding: utf-8 -*-
+$:.unshift("/Library/RubyMotion/lib")
+require 'motion/project'
+
+require 'rubygems'
+require 'bundler'
+Bundler.require :default
+
+Motion::Project::App.setup do |app|
+  # Use `rake config' to see complete project settings.
+  app.name = 'Example'
+  app.identifier = "com.usepropeller.hockeyapp.example"
+  app.version = "0.0.1"
+  app.pods do
+    pod 'HockeySDK'
+  end
+
+  app.hockeyapp do
+    app.hockeyapp.api_token = ENV['hockeyapp_token']
+    app.hockeyapp.app_id = ENV['hockeyapp_id']
+  end
+end
