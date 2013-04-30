@@ -138,46 +138,54 @@ end; end; end
 namespace 'hockeyapp' do
   desc "Submit an archive to HockeyApp"
   task :submit do
+    begin
+      # Set the build status
+      App.config_without_setup.hockeyapp_mode = true
 
-    # Set the build status
-    App.config_without_setup.hockeyapp_mode = true
+      # Validate configuration settings.
+      prefs = App.config.hockeyapp
+      App.fail "A value for app.hockeyapp.api_token is mandatory" unless prefs.api_token
+      App.fail "A value for app.hockeyapp.app_id is mandatory" unless prefs.app_id
 
-    # Validate configuration settings.
-    prefs = App.config.hockeyapp
-    App.fail "A value for app.hockeyapp.api_token is mandatory" unless prefs.api_token
-    App.fail "A value for app.hockeyapp.app_id is mandatory" unless prefs.app_id
+      # Allow CLI overrides for all properties
+      env_configs = HockeyAppConfig::PROPERTIES
+      env_configs.each do |config|
+        value = ENV[config.to_s]
+        if value
+          prefs.send("#{config}=", value)
+        end
+      end
 
-    # Allow CLI overrides for all properties
-    env_configs = HockeyAppConfig::PROPERTIES
-    env_configs.each do |config|
-      value = ENV[config.to_s]
-      if value
-        prefs.send("#{config}=", value)
+      # Create an archive
+      Rake::Task["archive"].invoke
+
+      # An archived version of the .dSYM bundle is needed.
+      app_dsym = App.config.app_bundle('iPhoneOS').sub(/\.app$/, '.dSYM')
+      app_dsym_zip = app_dsym + '.zip'
+      if !File.exist?(app_dsym_zip) or File.mtime(app_dsym) > File.mtime(app_dsym_zip)
+        Dir.chdir(File.dirname(app_dsym)) do
+          sh "/usr/bin/zip -q -r \"#{File.basename(app_dsym)}.zip\" \"#{File.basename(app_dsym)}\""
+        end
+      end
+
+      # This is an HockeyApp::Version object
+      @hockey_version = prefs.make_version
+      @hockey_version.ipa = nil # File.new(App.config.archive, 'r')
+      @hockey_version.dsym = File.new(app_dsym_zip, 'r')
+
+      App.info "Upload", "#{@hockey_version.inspect}"
+      result = prefs.client.post_new_version @hockey_version
+      App.info "Result", "#{result.inspect}"
+    ensure
+      if @hockey_version
+        if @hockey_version.ipa && @hockey_version.ipa.respond_to?("close")
+          @hockey_version.ipa.close
+        end
+        if @hockey_version.dsym && @hockey_version.dsym.respond_to?("close")
+          @hockey_version.dsym.close
+        end
       end
     end
-
-    # Create an archive
-    Rake::Task["archive"].invoke
-
-    # An archived version of the .dSYM bundle is needed.
-    app_dsym = App.config.app_bundle('iPhoneOS').sub(/\.app$/, '.dSYM')
-    app_dsym_zip = app_dsym + '.zip'
-    if !File.exist?(app_dsym_zip) or File.mtime(app_dsym) > File.mtime(app_dsym_zip)
-      Dir.chdir(File.dirname(app_dsym)) do
-        sh "/usr/bin/zip -q -r \"#{File.basename(app_dsym)}.zip\" \"#{File.basename(app_dsym)}\""
-      end
-    end
-
-    # This is an HockeyApp::Version object
-    hockey_version = prefs.make_version
-    hockey_version.ipa = File.new(App.config.archive, 'r')
-    hockey_version.dsym = File.new(app_dsym_zip, 'r')
-
-    App.info "Upload", "#{hockey_version.inspect}"
-    result = prefs.client.post_new_version hockey_version
-    hockey_version.ipa.close
-    hockey_version.dsym.close
-    App.info "Result", "#{result.inspect}"
   end
 
 
