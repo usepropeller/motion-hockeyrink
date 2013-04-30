@@ -55,19 +55,21 @@ The `app.hockeyapp` and `rake hockeyapp` task accept the following options:
 - `notes_type`, either `"textile"` or `"markdown"` - The format of your release notes (default is `"textile"`)
 - `notify`, either `true` or `false` - Whether or not to notify your testers (default is `false`)
 - `status`, either `"deny"` or `"allow"` - Whether testers can download the new version (default is `"deny"`)
-- `mandatory`
+- `mandatory`, either `true` or `false` - Whether or not this is a mandatory version (default is `false`)
+- `tags` - A comma-separated string of tags for this version
 
 So, this:
 
 ```ruby
 app.hockeyapp.notes = "New version"
 app.hockeyapp.notify = true
+app.hockeyapp.tags = "hello,world"
 ```
 
 is the same as:
 
 ```
-rake hockeyapp notes='New version' notify=true
+rake hockeyapp notes='New version' notify=true tags='hello,world'
 ```
 
 ## License
