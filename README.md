@@ -11,6 +11,9 @@ motion-hockeyrink allows RubyMotion projects to easily embed the [HockeyApp SDK]
 In your Rakefile:
 
 ```ruby
+require 'motion-hockeyrink'
+
+# Mandatory for installation the HockeySDK pod
 require 'motion-cocoapods'
 
 Motion::Project::App.setup do |app|
