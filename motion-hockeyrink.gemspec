@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 
-Version = "0.1.1"
+Version = "0.1.2"
 
 Gem::Specification.new do |spec|
   spec.name = 'motion-hockeyrink'
@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.homepage = 'https://github.com/usepropeller/motion-hockeyrink'
   spec.version = Version
 
-  spec.add_dependency "hockeyapp"
+  spec.add_dependency "hockeyapp-config"
 
   files = []
   files << 'README.md'
