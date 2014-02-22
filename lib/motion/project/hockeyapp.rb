@@ -48,29 +48,32 @@ module Motion; module Project; class Config
 end; end; end
 
 namespace 'hockeyapp' do
-  desc "Submit an archive to HockeyApp"
-  task :submit do
-    begin
-      # Set the build status
-      App.config_without_setup.hockeyapp_mode = true
+  desc "Build an archive for HockeyApp"
+  task :build do
+    # Set the build status
+    App.config_without_setup.hockeyapp_mode = true
 
-      # Validate configuration settings.
-      prefs = App.config.hockeyapp
-      App.fail "A value for app.hockeyapp.api_token is mandatory" unless prefs.api_token
-      App.fail "A value for app.hockeyapp.app_id is mandatory" unless prefs.app_id
+    # Validate configuration settings.
+    prefs = App.config.hockeyapp
+    App.fail "A value for app.hockeyapp.api_token is mandatory" unless prefs.api_token
+    App.fail "A value for app.hockeyapp.app_id is mandatory" unless prefs.app_id
 
-      # Allow CLI overrides for all properties
-      env_configs = HockeyAppConfig::PROPERTIES
-      env_configs.each do |config|
-        value = ENV[config.to_s]
-        if value
-          prefs.send("#{config}=", value)
-        end
+    # Allow CLI overrides for all properties
+    env_configs = HockeyAppConfig::PROPERTIES
+    env_configs.each do |config|
+      value = ENV[config.to_s]
+      if value
+        prefs.send("#{config}=", value)
       end
+    end
 
-      # Create an archive
-      Rake::Task["archive"].invoke
+    # Create an archive
+    Rake::Task["archive"].invoke
+  end
 
+  desc "Submit an archive to HockeyApp"
+  task :submit => [:build] do
+    begin
       # An archived version of the .dSYM bundle is needed.
       app_dsym = App.config.app_bundle('iPhoneOS').sub(/\.app$/, '.dSYM')
       app_dsym_zip = app_dsym + '.zip'
