@@ -74,6 +74,8 @@ namespace 'hockeyapp' do
   desc "Submit an archive to HockeyApp"
   task :submit => [:build] do
     begin
+      prefs = App.config.hockeyapp
+
       # An archived version of the .dSYM bundle is needed.
       app_dsym = App.config.app_bundle('iPhoneOS').sub(/\.app$/, '.dSYM')
       app_dsym_zip = app_dsym + '.zip'
