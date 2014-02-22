@@ -121,11 +121,12 @@ namespace 'hockeyapp' do
       previous_hockeyapp_mode = File.read(previous_hockeyapp_mode_file).strip
     end
     if previous_hockeyapp_mode != hockeyapp_mode
-      App.info "HockeyApp", "Cleaning executable, Info.plist, and PkgInfo for mode change (was: #{previous_hockeyapp_mode}, now: #{hockeyapp_mode})"
+      App.info "HockeyApp", "Cleaning executable, Info.plist, dSYM, and PkgInfo for mode change (was: #{previous_hockeyapp_mode}, now: #{hockeyapp_mode})"
       [
         App.config.app_bundle_executable(platform), # main_exec
         File.join(bundle_path, 'Info.plist'), # bundle_info_plist
-        File.join(bundle_path, 'PkgInfo') # bundle_pkginfo
+        File.join(bundle_path, 'PkgInfo'), # bundle_pkginfo
+        App.config.app_bundle_dsym(platform)
       ].each do |path|
         rm_rf(path) if File.exist?(path)
       end
