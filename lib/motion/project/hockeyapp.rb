@@ -1,16 +1,16 @@
 # Copyright (c) 2013, Turboprop Inc, Clay Allsopp <clay@usepropeller.com>
 # Copyright (c) 2012, Laurent Sansonetti <lrz@hipbyte.com>
 # All rights reserved.
-# 
+#
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
-# 
+#
 # 1. Redistributions of source code must retain the above copyright notice,
 #    this list of conditions and the following disclaimer.
 # 2. Redistributions in binary form must reproduce the above copyright notice,
 #    this list of conditions and the following disclaimer in the documentation
 #    and/or other materials provided with the distribution.
-# 
+#
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -90,9 +90,18 @@ namespace 'hockeyapp' do
       @hockey_version.ipa = File.new(App.config.archive, 'r')
       @hockey_version.dsym = File.new(app_dsym_zip, 'r')
 
-      App.info "Upload", "#{@hockey_version.inspect}"
+      App.info "Upload", "#{App.config.version}: #{@hockey_version.notes}"
       result = prefs.client.post_new_version @hockey_version
-      App.info "Result", "#{result.inspect}"
+
+      result.app.platform= HockeyApp::App::IOS # It needs this to determine the correct url.
+
+      # The version id is added async, this normaly happens within one second.
+      while result.id == nil && tries < 100
+        sleep 0.1
+        tries += 1
+      end
+
+      App.info "Completed", result.direct_download_url
     ensure
       if @hockey_version
         if @hockey_version.ipa && @hockey_version.ipa.respond_to?("close")
